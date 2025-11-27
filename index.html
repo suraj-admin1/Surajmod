@@ -503,6 +503,7 @@
         #toast {
             visibility: hidden;
             min-width: 250px;
+            
             background-color: #333;
             color: var(--text-color);
             text-align: center;
@@ -1123,7 +1124,7 @@
             const inputPassword = $('adminPasswordInput').value;
             $('adminPasswordInput').value = ''; 
             if (inputPassword === ADMIN_PASSWORD) {
-                closeModal('passwordModal');
+                closeModal('surajxmodz');
                 saveConfigToGitLab();
             } else {
                 showToast('Incorrect Password. Update aborted.', 3000);

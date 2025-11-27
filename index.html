@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPMods Login/Update Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Modern, Spotify/Android-like Dark Theme CSS */
+        :root {
+            --primary-color: #1DB954;
+            --secondary-color: #282828;
+            --background-color: #121212;
+            --text-color: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --danger-color: #FF4D4D;
+            --danger-glow: rgba(255, 77, 77, 0.7);
+            --glow-color-light: rgba(29, 185, 84, 0.7);
+            --glow-color-dark: rgba(29, 185, 84, 0.3);
+            --soft-glow: 0 0 10px var(--glow-color-light), 0 0 5px var(--glow-color-dark);
+        }
+        
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 var(--danger-glow);
+                border-color: var(--danger-glow);
+            }
+            70% {
+                box-shadow: 0 0 10px 5px rgba(255, 77, 77, 0);
+                border-color: var(--danger-color);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
+                border-color: var(--danger-glow);
+            }
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0 0 100px 0;
+            line-height: 1.6;
+        }
+
+        #app {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px rgba(29, 185, 84, 0.5);
+        }
+
+        /* --- Tab System --- */
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            flex-grow: 1;
+            background-color: #333;
+            color: var(--text-secondary);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 700;
+            font-size: 1em;
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+        }
+
+        .content-tab {
+            display: none;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .content-tab.active {
+            display: block;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            color: var(--text-color);
+            font-weight: 700;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background-color: #333;
+            color: var(--text-color);
+            outline: none;
+            transition: border-color 0.2s;
+            font-size: 1em;
+        }
+        
+        .search-bar input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(29, 185, 84, 0.5);
+        }
+        
+        /* --- NEW: Filter Bar --- */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-bar button {
+            flex-grow: 1;
+            background-color: #333;
+            color: var(--text-secondary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 700;
+        }
+        
+        .filter-bar button.active {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+        }
+
+        /* --- User/ID List Styling --- */
+        #keyList {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            background-color: #1e1e1e;
+            border: 2px solid transparent; 
+        }
+        
+        .user-item.expired {
+            border-left: 5px solid var(--danger-color);
+            animation: pulse-red 2s infinite;
+        }
+        
+        .user-status-tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--background-color);
+            background-color: var(--danger-color);
+            margin-right: 10px;
+            align-self: flex-start;
+        }
+
+        .user-item-text {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden; 
+        }
+
+        .user-item-text strong {
+            font-size: 1.1em;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+        
+        .user-item.expired .user-item-text strong {
+            color: var(--danger-color);
+        }
+
+        .user-item-text span {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--text-color);
+            background-color: #383838;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* --- Buttons (General) --- */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #1ed760;
+            box-shadow: 0 0 15px var(--glow-color-dark);
+        }
+
+        .btn-secondary {
+            background-color: #444;
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #555;
+        }
+        
+        .date-shortcuts {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-shortcut {
+            background-color: #333;
+            color: var(--primary-color);
+            border: 1px solid #444;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+            flex-grow: 1;
+        }
+        
+        .btn-shortcut:hover {
+            background-color: #444;
+        }
+
+        /* --- Floating Action Buttons --- */
+        #saveAllBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-size: 1em;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), var(--soft-glow);
+        }
+        
+        #addNewKeyBtn {
+            position: fixed;
+            bottom: 90px; 
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), var(--soft-glow);
+            padding: 0;
+            line-height: 50px;
+            text-align: center;
+        }
+
+        /* --- Form Elements (Shared) --- */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background-color: #333;
+            color: var(--text-color);
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(29, 185, 84, 0.5);
+        }
+        
+        /* --- Toggle Switch (for booleans) --- */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background-color: #333;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+
+        .toggle-row label {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+        /* --- End Toggle Switch --- */
+
+
+        /* --- Modals (Popups) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-color);
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--text-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* --- Loading and Toast --- */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .spinner {
+            border: 5px solid #333;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 3001;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0s;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--secondary-color);
+            font-size: 0.9em;
+        }
+        footer p {
+            margin: 5px 0;
+        }
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: #1ed760; /* Lighter green */
+        }
+
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 500px) {
+            #app {
+                padding: 10px;
+            }
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .user-item-info {
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+                margin-top: 5px;
+            }
+            /* --- NEW: Responsive Filter --- */
+            .filter-bar {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <header>
+            <h1>DPMods Login/Update Panel</h1>
+        </header>
+
+        <div class="tab-container">
+            <button class="tab-button active" onclick="openTab('keysTab', this)">Key Management</button>
+            <button class="tab-button" onclick="openTab('settingsTab', this)">Dialog Settings</button>
+        </div>
+
+        <main>
+            <div id="keysTab" class="content-tab active">
+                <h2>Global Key Settings</h2>
+                <div class="form-group">
+                    <label for="showOnDateInput">Show On Date</label>
+                    <input type="date" id="showOnDateInput">
+                </div>
+                
+                <div class="search-bar" style="margin-top: 20px;">
+                    <input type="text" id="searchInput" placeholder="Search by Key Name or Device ID...">
+                    <button class="btn-primary" onclick="renderKeys()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="filter-bar">
+                    <button id="filter-all" class="active" onclick="setKeyFilter('all', this)">
+                        All <span id="count-all"></span>
+                    </button>
+                    <button id="filter-valid" onclick="setKeyFilter('valid', this)">
+                        Valid <span id="count-valid"></span>
+                    </button>
+                    <button id="filter-expired" onclick="setKeyFilter('expired', this)">
+                        Expired <span id="count-expired"></span>
+                    </button>
+                </div>
+
+                <h2>Key List</h2>
+                <div id="keyList">
+                    <p style="color: var(--text-secondary); text-align: center;">Loading keys...</p>
+                </div>
+            </div>
+
+            <div id="settingsTab" class="content-tab">
+                <h2>Update Dialog Settings</h2>
+                <div class="form-group">
+                    <label for="updateTopText">Top Text</label>
+                    <input type="text" id="updateTopText" placeholder="e.g., Update Available">
+                </div>
+                <div class="form-group">
+                    <label for="updateMainQuestion">Main Question</label>
+                    <input type="text" id="updateMainQuestion" placeholder="e.g., A new version is ready!">
+                </div>
+                <div class="form-group">
+                    <label for="updateButtonText">Button Text</label>
+                    <input type="text" id="updateButtonText" placeholder="e.g., Download Now">
+                </div>
+                <div class="form-group">
+                    <label for="updateButtonUrl">Button Click URL</label>
+                    <input type="text" id="updateButtonUrl" placeholder="https://www.youtube.com/@DPModsYT">
+                </div>
+
+                <h2 style="margin-top: 30px;">Login Dialog Settings</h2>
+                <div class="form-group">
+                    <label for="loginTopText">Top Text</label>
+                    <input type="text" id="loginTopText" placeholder="e.g., Access Required">
+                </div>
+                <div class="form-group">
+                    <label for="loginButtonText">Button Text</label>
+                    <input type="text" id="loginButtonText" placeholder="e.g., Login">
+                </div>
+                <div class="form-group">
+                    <label for="loginAdminButtonText">Admin Button Text</label>
+                    <input type="text" id="loginAdminButtonText" placeholder="e.g., Admin">
+                </div>
+                <div class="form-group">
+                    <label for="loginAdminButtonUrl">Admin Button URL</label>
+                    <input type="text" id="loginAdminButtonUrl" placeholder="https://t.me/YourTelegramLink">
+                </div>
+                
+                <h2 style="margin-top: 30px;">Common Style Settings</h2>
+                <div class="form-group">
+                    <label for="styleTopIconAsset">Top Icon Asset (e.g., icon.png)</label>
+                    <input type="text" id="styleTopIconAsset" placeholder="icon.png">
+                </div>
+                
+                <div class="toggle-row">
+                    <label for="styleTopIconSpin">Top Icon Spin</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="styleTopIconSpin">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-row">
+                    <label for="styleAnimateGradient">Animate Gradient</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="styleAnimateGradient">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="styleButtonGradientStart">Button Gradient Start Color</label>
+                    <input type="text" id="styleButtonGradientStart" placeholder="#FFDAB9">
+                </div>
+                <div class="form-group">
+                    <label for="styleButtonGradientEnd">Button Gradient End Color</label>
+                    <input type="text" id="styleButtonGradientEnd" placeholder="#E6E6FA">
+                </div>
+                <div class="form-group">
+                    <label for="styleButtonTextColor">Button Text Color</label>
+                    <input type="text" id="styleButtonTextColor" placeholder="#333333">
+                </div>
+
+            </div>
+        </main>
+        
+        <footer>
+            <p>Panel by DPMods</p>
+            <p>
+                <a href="https://t.me/dp_mods" target="_blank" rel="noopener noreferrer">Telegram Group</a> | 
+                <a href="https://t.me/DPMods_bot" target="_blank" rel="noopener noreferrer">Telegram Profile</a>
+            </p>
+        </footer>
+
+    </div>
+
+    <button class="btn-primary" id="saveAllBtn" title="Save All Changes to GitLab">
+        <i class="fas fa-save"></i> Save All Changes
+    </button>
+    
+    <button class="btn-primary" id="addNewKeyBtn" title="Add New Key">
+        <i class="fas fa-plus"></i>
+    </button>
+    
+    <div id="keyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('keyModal')">&times;</span>
+            <h2 id="keyModalTitle">Add New Key</h2>
+
+            <div class="form-group">
+                <label for="keyNameInput">Key Name (e.g., "dpmods")</label>
+                <input type="text" id="keyNameInput" placeholder="This is the unique name for the key" required>
+            </div>
+            <div class="form-group">
+                <label for="deviceIdInput">Device ID</label>
+                <input type="text" id="deviceIdInput" placeholder="e.g., 3ba4a93f018dc799 or ANY" required>
+            </div>
+            
+            <label>Expiry Date</label>
+            <div class="date-shortcuts">
+                <button class="btn-shortcut" onclick="setExpiryShortcut(1)">+1D</button>
+                <button class="btn-shortcut" onclick="setExpiryShortcut(7)">+7D</button>
+                <button class="btn-shortcut" onclick="setExpiryShortcut(30)">+30D</button>
+                <button class="btn-shortcut" onclick="setExpiryShortcut(365)">+1Y</button>
+            </div>
+            <div class="form-group">
+                <input type="date" id="expiryDateInput" required>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeModal('keyModal')">Cancel</button>
+                <button class="btn-primary" id="saveKeyBtn">Save Key</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Action</h2>
+            <p style="color: var(--text-secondary);">Enter Admin Password to save all changes to GitLab.</p>
+            <div class="form-group">
+                <label for="adminPasswordInput">Admin Password</label>
+                <input type="password" id="adminPasswordInput" placeholder="Enter password" required>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeModal('passwordModal')">Cancel</button>
+                <button class="btn-primary" id="confirmUpdateBtn">Confirm Update</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        // ====================================================================
+        // CONFIGURATION
+        // ====================================================================
+        const GITLAB_PROJECT_PATH = "DPModsYT/2in1"; // Your project path
+        const GITLAB_FILE_PATH = "Key.json"; // The name of your complex JSON file
+        const GITLAB_BRANCH = "main";
+        
+        // !!! THIS TOKEN IS PUBLICLY COMPROMISED. REVOKE IT IMMEDIATELY. !!!
+        const PRIVATE_TOKEN = "glpat-5FeCktkQDZYpe1ZxxbrN_286MQp1OmloNXZsCw.01.1202znkov"; 
+        
+        const ADMIN_PASSWORD = ""; // CHANGE THIS to a secure password
+
+        // URL Setup 
+        const ENCODED_PROJECT_PATH = encodeURIComponent(GITLAB_PROJECT_PATH);
+        const ENCODED_FILE_PATH = encodeURIComponent(GITLAB_FILE_PATH);
+        const API_URL = `https://gitlab.com/api/v4/projects/${ENCODED_PROJECT_PATH}/repository/files/${ENCODED_FILE_PATH}`;
+
+        let globalConfig = {};
+        let currentEditingKeyName = null;
+        let currentSearchTerm = '';
+        let currentKeyFilter = 'all'; // --- NEW: Filter State ---
+
+        // Utility Functions
+        const $ = id => document.getElementById(id);
+
+        function showToast(message, duration = 3000) {
+            const toast = $('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function openModal(modalId) {
+            $(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            $(modalId).style.display = 'none';
+        }
+
+        function openTab(tabId, button) {
+            document.querySelectorAll('.content-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            $(tabId).classList.add('active');
+            button.classList.add('active');
+            $('addNewKeyBtn').style.display = (tabId === 'keysTab') ? 'block' : 'none';
+        }
+        
+        // --- NEW: Set Key Filter ---
+        function setKeyFilter(filter, button) {
+            currentKeyFilter = filter;
+            // Update button active state
+            document.querySelectorAll('.filter-bar button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+            // Re-render the list with the new filter
+            renderKeys();
+        }
+
+        // --- Date Helpers ---
+        function isExpired(dateString) {
+            if (!dateString) return true; 
+            try {
+                const expiryDate = new Date(dateString);
+                expiryDate.setHours(23, 59, 59, 999); 
+                const today = new Date();
+                return expiryDate < today; 
+            } catch (e) {
+                return true;
+            }
+        }
+        
+        function formatISODate(dateString) {
+            if (!dateString) return '';
+            try {
+                return dateString.split('T')[0];
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function toFullISODate(dateString, isExpiry = false) {
+            if (!dateString) return new Date().toISOString();
+            if (isExpiry) {
+                return `${dateString}T23:59:59Z`;
+            }
+            return `${dateString}T00:00:00Z`;
+        }
+        
+        function setExpiryShortcut(days) {
+            const dateInput = $('expiryDateInput');
+            const today = new Date();
+            today.setDate(today.getDate() + days);
+            dateInput.value = today.toISOString().split('T')[0];
+        }
+
+        // --- Data Rendering ---
+        
+        function renderAllData() {
+            if (!globalConfig) {
+                showToast("Failed to load config, data is empty.", 4000);
+                return;
+            }
+            $('showOnDateInput').value = formatISODate(globalConfig.showOnDate);
+            renderKeys(); 
+
+            const updateDialog = globalConfig.update_dialog || {};
+            $('updateTopText').value = updateDialog.topText || '';
+            $('updateMainQuestion').value = updateDialog.mainQuestion || '';
+            $('updateButtonText').value = updateDialog.buttonText || '';
+            $('updateButtonUrl').value = updateDialog.buttonClickUrl || '';
+
+            const loginDialog = globalConfig.login_dialog || {};
+            $('loginTopText').value = loginDialog.topText || '';
+            $('loginButtonText').value = loginDialog.buttonText || '';
+            $('loginAdminButtonText').value = loginDialog.adminButtonText || '';
+            $('loginAdminButtonUrl').value = loginDialog.adminButtonUrl || '';
+            
+            const commonStyle = globalConfig.common_style || {};
+            $('styleTopIconAsset').value = commonStyle.topIconAsset || '';
+            $('styleTopIconSpin').checked = commonStyle.topIconSpin || false;
+            $('styleAnimateGradient').checked = commonStyle.animateGradient || false;
+            $('styleButtonGradientStart').value = commonStyle.buttonGradientStartColor || '';
+            $('styleButtonGradientEnd').value = commonStyle.buttonGradientEndColor || '';
+            $('styleButtonTextColor').value = commonStyle.buttonTextColor || '';
+        }
+
+        function renderKeys() {
+            const keyList = $('keyList');
+            keyList.innerHTML = '';
+            const keysObject = globalConfig.keys || {};
+            
+            // --- UPDATED: Search/Filter/Count Logic ---
+            currentSearchTerm = $('searchInput').value.toLowerCase().trim();
+            let allKeyNames = Object.keys(keysObject);
+            
+            let validCount = 0;
+            let expiredCount = 0;
+
+            // 1. Filter by Search Term First & Calculate Counts
+            const searchedKeyNames = allKeyNames.filter(keyName => {
+                const item = keysObject[keyName];
+                const deviceId = item.deviceId || '';
+                
+                // Check search match
+                const matchesSearch = currentSearchTerm ? 
+                    (keyName.toLowerCase().includes(currentSearchTerm) || 
+                     deviceId.toLowerCase().includes(currentSearchTerm)) 
+                    : true;
+                
+                // Calculate counts based on search results
+                if (matchesSearch) {
+                    if (isExpired(item.expiryDate)) {
+                        expiredCount++;
+                    } else {
+                        validCount++;
+                    }
+                }
+                return matchesSearch;
+            });
+
+            // 2. Update Count HTML
+            $('count-all').textContent = `(${(validCount + expiredCount)})`;
+            $('count-valid').textContent = `(${validCount})`;
+            $('count-expired').textContent = `(${expiredCount})`;
+
+            // 3. Filter by 'currentKeyFilter'
+            let filteredKeyNames;
+            if (currentKeyFilter === 'valid') {
+                filteredKeyNames = searchedKeyNames.filter(keyName => !isExpired(keysObject[keyName].expiryDate));
+            } else if (currentKeyFilter === 'expired') {
+                filteredKeyNames = searchedKeyNames.filter(keyName => isExpired(keysObject[keyName].expiryDate));
+            } else {
+                filteredKeyNames = searchedKeyNames; // 'all'
+            }
+
+            // 4. Sort (Expired First)
+            filteredKeyNames.sort((a, b) => {
+                const itemA = keysObject[a];
+                const itemB = keysObject[b];
+                const aExpired = isExpired(itemA.expiryDate);
+                const bExpired = isExpired(itemB.expiryDate);
+                if (aExpired && !bExpired) return -1; 
+                if (!aExpired && bExpired) return 1;  
+                return a.localeCompare(b); 
+            });
+
+            // 5. Render
+            if (filteredKeyNames.length === 0) {
+                const message = currentSearchTerm 
+                    ? "No keys found matching your search/filter." 
+                    : "No keys found.";
+                keyList.innerHTML = `<p style="color: var(--text-secondary); text-align: center;">${message}</p>`;
+                return;
+            }
+
+            filteredKeyNames.forEach(keyName => {
+                const item = keysObject[keyName];
+                const expired = isExpired(item.expiryDate);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'user-item' + (expired ? ' expired' : ''); 
+                const statusTag = expired ? `<span class="user-status-tag">EXPIRED</span>` : '';
+                const expiryDateText = formatISODate(item.expiryDate) || 'No Date';
+
+                itemDiv.innerHTML = `
+                    <div class="user-item-info">
+                        ${statusTag}
+                        <div class="user-item-text">
+                            <strong>${keyName}</strong>
+                            <span>Device ID: ${item.deviceId}</span>
+                            <span>Expiry: ${expiryDateText}</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn edit-btn" onclick="showKeyModal('${keyName}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteKey('${keyName}')" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                keyList.appendChild(itemDiv);
+            });
+        }
+
+        // --- Key CRUD (Create/Read/Update/Delete) Logic ---
+
+        function showKeyModal(keyName = null) {
+            if (keyName) {
+                currentEditingKeyName = keyName;
+                const item = globalConfig.keys[keyName];
+                $('keyModalTitle').textContent = 'Edit Key';
+                $('keyNameInput').value = keyName;
+                $('keyNameInput').disabled = true; 
+                $('deviceIdInput').value = item.deviceId;
+                $('expiryDateInput').value = formatISODate(item.expiryDate);
+            } else {
+                currentEditingKeyName = null;
+                $('keyModalTitle').textContent = 'Add New Key';
+                $('keyNameInput').value = '';
+                $('keyNameInput').disabled = false;
+                $('deviceIdInput').value = '';
+                setExpiryShortcut(30); 
+            }
+            openModal('keyModal');
+        }
+
+        function handleKeySave() {
+            const keyName = $('keyNameInput').value.trim();
+            const deviceId = $('deviceIdInput').value.trim();
+            const expiryDate = $('expiryDateInput').value;
+
+            if (!keyName || !deviceId || !expiryDate) {
+                showToast('Key Name, Device ID, and Expiry Date are required.', 3000);
+                return;
+            }
+            if (!currentEditingKeyName && globalConfig.keys && globalConfig.keys[keyName]) {
+                 showToast('A key with this name already exists.', 3000);
+                 return;
+            }
+            if (!globalConfig.keys) {
+                globalConfig.keys = {}; 
+            }
+            globalConfig.keys[keyName] = {
+                deviceId: deviceId,
+                expiryDate: toFullISODate(expiryDate, true)
+            };
+            showToast(`Key "${keyName}" saved locally.`, 2000);
+            renderKeys(); 
+            closeModal('keyModal');
+        }
+
+        function deleteKey(keyName) {
+            if (confirm(`Are you sure you want to delete the key: "${keyName}"?`)) {
+                if (globalConfig.keys && globalConfig.keys[keyName]) {
+                    delete globalConfig.keys[keyName];
+                    showToast(`Key "${keyName}" deleted locally.`, 2000);
+                    renderKeys(); 
+                }
+            }
+        }
+
+        // --- GitLab API Interaction ---
+        
+        async function loadConfig() {
+            $('loading').style.display = 'flex';
+            try {
+                const response = await fetch(`${API_URL}?ref=${GITLAB_BRANCH}`, {
+                    headers: { 'Private-Token': PRIVATE_TOKEN }
+                });
+                if (!response.ok) {
+                    throw new Error(`GitLab API read failed: ${response.statusText}`);
+                }
+                const fileData = await response.json();
+                const jsonContent = atob(fileData.content);
+                globalConfig = JSON.parse(decodeURIComponent(escape(jsonContent)));
+
+                if (typeof globalConfig !== 'object' || globalConfig === null) {
+                     globalConfig = {};
+                     showToast("Warning: Loaded file was not a valid object.", 3000);
+                }
+                renderAllData();
+                showToast('Configuration loaded successfully.', 2000);
+            } catch (error) {
+                console.error('Error loading config:', error);
+                showToast(`Failed to load config: ${error.message}`, 5000);
+                globalConfig = {}; 
+                renderAllData();
+            } finally {
+                $('loading').style.display = 'none';
+            }
+        }
+        
+        function prepareAndSave() {
+            try {
+                // 1. Global Settings
+                globalConfig.showOnDate = toFullISODate($('showOnDateInput').value);
+
+                // 2. Update Dialog
+                if (!globalConfig.update_dialog) globalConfig.update_dialog = {};
+                globalConfig.update_dialog.topText = $('updateTopText').value;
+                globalConfig.update_dialog.mainQuestion = $('updateMainQuestion').value;
+                globalConfig.update_dialog.buttonText = $('updateButtonText').value;
+                globalConfig.update_dialog.buttonClickUrl = $('updateButtonUrl').value;
+
+                // 3. Login Dialog
+                if (!globalConfig.login_dialog) globalConfig.login_dialog = {};
+                globalConfig.login_dialog.topText = $('loginTopText').value;
+                globalConfig.login_dialog.buttonText = $('loginButtonText').value;
+                globalConfig.login_dialog.adminButtonText = $('loginAdminButtonText').value;
+                globalConfig.login_dialog.adminButtonUrl = $('loginAdminButtonUrl').value;
+                
+                // 4. Common Style
+                if (!globalConfig.common_style) globalConfig.common_style = {};
+                globalConfig.common_style.topIconAsset = $('styleTopIconAsset').value;
+                globalConfig.common_style.topIconSpin = $('styleTopIconSpin').checked;
+                globalConfig.common_style.animateGradient = $('styleAnimateGradient').checked;
+                globalConfig.common_style.buttonGradientStartColor = $('styleButtonGradientStart').value;
+                globalConfig.common_style.buttonGradientEndColor = $('styleButtonGradientEnd').value;
+                globalConfig.common_style.buttonTextColor = $('styleButtonTextColor').value;
+                
+                // 5. Open Password Modal
+                openModal('passwordModal');
+            } catch (error) {
+                showToast(`Error preparing data: ${error.message}`, 4000);
+            }
+        }
+
+        function handlePasswordConfirmation() {
+            const inputPassword = $('adminPasswordInput').value;
+            $('adminPasswordInput').value = ''; 
+            if (inputPassword === ADMIN_PASSWORD) {
+                closeModal('passwordModal');
+                saveConfigToGitLab();
+            } else {
+                showToast('Incorrect Password. Update aborted.', 3000);
+            }
+        }
+
+        async function saveConfigToGitLab() {
+            $('loading').style.display = 'flex';
+            try {
+                const newJsonString = JSON.stringify(globalConfig, null, 2);
+                const utf8Bytes = new TextEncoder().encode(newJsonString);
+                let binaryString = '';
+                utf8Bytes.forEach(byte => {
+                    binaryString += String.fromCharCode(byte);
+                });
+                
+                const base64Content = btoa(binaryString);
+                const commitMessage = 'Settings updated by Admin Panel';
+
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Private-Token': PRIVATE_TOKEN
+                    },
+                    body: JSON.stringify({
+                        branch: GITLAB_BRANCH,
+                        content: base64Content,
+                        commit_message: commitMessage,
+                        encoding: 'base64',
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`GitLab API update failed: ${response.status} - ${JSON.stringify(errorBody.message || errorBody)}`);
+                }
+                showToast('Configuration updated and saved to GitLab!', 4000);
+                loadConfig(); 
+            } catch (error)
+            {
+                console.error('Error saving config:', error);
+                showToast(`Failed to save config: ${error.message}`, 8000);
+            } finally {
+                $('loading').style.display = 'none';
+            }
+        }
+
+        // ====================================================================
+        // EVENT LISTENERS 
+        // ====================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            $('addNewKeyBtn').style.display = 'block'; 
+
+            $('searchInput').addEventListener('keyup', (event) => {
+                renderKeys();
+            });
+
+            $('addNewKeyBtn').addEventListener('click', () => showKeyModal(null));
+            $('saveKeyBtn').addEventListener('click', handleKeySave);
+            $('saveAllBtn').addEventListener('click', prepareAndSave);
+            $('confirmUpdateBtn').addEventListener('click', handlePasswordConfirmation);
+        });
+    </script>
+</body>
+
+</html>

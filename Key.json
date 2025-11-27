@@ -1,0 +1,33 @@
+{
+  "showOnDate": "2026-11-20T00:00:00Z",
+  "update_dialog": {
+    "topText": "𝐍ᴇᴡ 𝐔ᴘᴅᴀᴛᴇ 𝐀ᴠᴀɪʟᴀʙʟᴇ!",
+    "mainQuestion": "𝐀ʀᴇ 𝐘ᴏᴜ 𝐑ᴇᴀᴅʏ 𝐓ᴏ 𝐔ᴘᴅᴀᴛᴇ.......⚙️",
+    "buttonText": "𝐃ᴏᴡɴʟᴏᴀᴅ",
+    "buttonClickUrl": "https://t.me/+gOZ6Gfnqsx01Mzl"
+  },
+  "login_dialog": {
+    "topText": "𝐌ᴏᴅ 𝐁ʏ 𝐙ᴀʏɪᴋꜱX",
+    "buttonText": "𝐋ᴏɢɪɴ",
+    "adminButtonText": "𝐀ᴅᴍɪɴ",
+    "adminButtonUrl": "https://t.me/ZAYIKSX"
+  },
+  "common_style": {
+    "topIconAsset": "icon.png",
+    "topIconSpin": true,
+    "animateGradient": true,
+    "buttonGradientStartColor": "#4B0082",
+    "buttonGradientEndColor": "#DAA520",
+    "buttonTextColor": "#FFEB3B"
+  },
+  "keys": {
+    "NewUserKey": {
+      "deviceId": "ANY",
+      "expiryDate": "2020-12-09T23:59:59Z"
+    },
+    "ZAYIKSX": {
+      "deviceId": "37582cd5e0f6e735",
+      "expiryDate": "2025-11-24T23:59:59Z"
+    }
+  }
+}
